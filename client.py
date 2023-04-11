@@ -2,7 +2,7 @@ import socket
 import threading
 
 HOST = "127.0.0.1"
-PORT = 12347
+PORT = 12340
 
 def receive_messages(sock):
     while True:
@@ -11,18 +11,64 @@ def receive_messages(sock):
             break
         print(data.decode("utf-8"))
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect((HOST, PORT))
+def main():
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-name = input("Enter your name: ")
-sock.sendall(name.encode("utf-8"))
+    while True:
+        command = input("Enter command: ")
 
-threading.Thread(target=receive_messages, args=(sock,)).start()
+        if command.startswith("%connect"):
+            try:
+                _, host, port = command.split(" ")
+                port = int(port)
+                sock.connect((host, port))
+                break
+            except Exception as e:
+                print("Unable to connect. Please check the host and port and try again.")
 
-while True:
-    msg = input("Enter your message: ")
-    if msg.lower() == "quit":
-        break
-    sock.sendall(msg.encode("utf-8"))
+    name = input("Enter your name: ")
+    sock.sendall(name.encode("utf-8"))
 
-sock.close()
+    threading.Thread(target=receive_messages, args=(sock,)).start()
+
+    while True:
+        command = input()
+
+        if command == "%join":
+            sock.sendall(b"%join")
+
+        elif command.startswith("%post"):
+            try:
+                _, subject, content = command.split(" ", 2)
+                sock.sendall((f"%post {subject} {content}").encode("utf-8"))
+            except ValueError:
+                print("Invalid post format.")
+                print("Usage: %post <subject> <content>")
+
+        elif command == "%users":
+            sock.sendall(b"%users")
+
+        elif command.startswith("%message"):
+            try:
+                _, message_id = command.split(" ")
+                sock.sendall(("%message " + message_id).encode("utf-8"))
+            except ValueError:
+                print("Invalid message command format. Usage: %message <message_id>")
+
+        elif command == "%leave":
+            print("Leaving the group...")
+            sock.sendall(b"%leave")
+            break
+
+        elif command == "%exit":
+            print("Disconnecting from the server and exiting...")
+            sock.close()
+            break
+
+        else:
+            print("Invalid command.")
+
+    sock.close()
+
+if __name__ == "__main__":
+    main()
