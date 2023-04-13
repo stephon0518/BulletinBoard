@@ -44,6 +44,9 @@ class ClientThread(threading.Thread):
                     joined = True
                     self.conn.sendall("You have joined the message board.".encode("utf-8"))
 
+                    users_list = "Users who joined earlier: " + ", ".join(client_names.values())
+                    self.conn.sendall(users_list.encode("utf-8"))
+
                     for msg in messages[-2:]:
                         self.conn.sendall(msg.encode("utf-8"))
 
@@ -51,16 +54,23 @@ class ClientThread(threading.Thread):
                     self.conn.sendall("You have already joined the message board.".encode("utf-8"))
 
             elif command == "%post":
-                subject, content = command_parts[1].split(" ", 1)[1].split(" ", 1)
-                message_counter += 1
-                post_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                formatted_message = f"Message ID {message_counter}, {name}, {post_date}, {subject}: {content}\n"
-                messages.append(formatted_message)
+                if len(command_parts) > 1:
+                    try:
+                        subject, content = command_parts[1].split(" ", 1)
+                    except ValueError:
+                        self.conn.sendall("Invalid post format. Usage: %post <subject> <content>".encode("utf-8"))
+                        continue
 
-                for addr, conn in connections.items():
-                    if addr != self.addr:
-                        conn.sendall(("%post " + formatted_message).encode())
+                    message_counter += 1
+                    post_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    formatted_message = f"\nMessage ID {message_counter}, {name}, {post_date}, {subject}: {content}\n"
+                    messages.append(formatted_message)
 
+                    for addr, conn in connections.items():
+                        if addr != self.addr:
+                            conn.sendall(("%post " + formatted_message).encode())
+                else:
+                    self.conn.sendall("Invalid post format. Usage: %post <subject> <content>".encode("utf-8"))
             elif command == "%users":
                 users_list = "Current users: " + ", ".join(client_names.values())
                 self.conn.sendall(users_list.encode("utf-8"))
@@ -72,12 +82,24 @@ class ClientThread(threading.Thread):
                 else:
                     self.conn.sendall("Invalid message ID.".encode("utf-8"))
 
+            elif command == "%groups":
+                groups_list = "Available groups: " + ", ".join(groups.keys())
+                self.conn.sendall(groups_list.encode("utf-8"))
+
             elif command == "%groupjoin":
                 group_name = command_parts[1]
                 if group_name in groups:
                     groups[group_name]['users'][self.addr] = name
                     user_groups.add(group_name)
                     self.conn.sendall(f"You have joined {group_name}.".encode("utf-8"))
+
+                    users_list = "Users who joined earlier: " + ", ".join(groups[group_name]['users'].values()) + "\n"
+
+                    self.conn.sendall(users_list.encode("utf-8"))
+
+                    # Send the last 2 messages in the group
+                    for message in groups[group_name]['messages'][-2:]:
+                        self.conn.sendall(message.encode("utf-8"))
 
                     # Notify other users in the group that a new user has joined
                     for other_addr in groups[group_name]['users']:
@@ -91,7 +113,7 @@ class ClientThread(threading.Thread):
                 group_name, subject, content = command_parts[1].split(" ", 2)
                 if group_name in user_groups:
                     post_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    formatted_message = f"{name}, {post_date}, {subject}: {content}"
+                    formatted_message = f"{name}, {post_date}, {subject}: {content}\n"
                     groups[group_name]['messages'].append(formatted_message)
 
                     for addr in groups[group_name]['users']:
@@ -103,10 +125,12 @@ class ClientThread(threading.Thread):
             elif command == "%groupusers":
                 group_name = command_parts[1]
                 if group_name in user_groups:
+                    # Directly use the users in the group
                     users_list = "Users in {}: ".format(group_name) + ", ".join(groups[group_name]['users'].values())
                     self.conn.sendall(users_list.encode("utf-8"))
                 else:
                     self.conn.sendall("You are not a member of this group.".encode("utf-8"))
+
 
             elif command == "%groupleave":
                 group_name = command_parts[1]
@@ -158,4 +182,3 @@ while True:
     connections[addr] = conn
     client_thread = ClientThread(conn, addr)
     client_thread.start()
-
