@@ -9,7 +9,7 @@ def receive_messages(sock):
         data = sock.recv(1024)
         if not data:
             break
-        print(data.decode("utf-8"))
+        print(data.decode("utf-8"))    
 
 def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -56,9 +56,11 @@ def main():
                 print("Invalid message command format. Usage: %message <message_id>")
 
         elif command == "%leave":
-            print("Leaving the group...")
+            print("Leaving the public message board...")
             sock.sendall(b"%leave")
-            break
+
+        elif command == "%groups":
+            sock.sendall(b"%groups")
 
         elif command.startswith("%groupjoin"):
             sock.sendall(command.encode("utf-8"))
