@@ -9,11 +9,9 @@ def receive_messages(sock):
         data = sock.recv(1024)
         if not data:
             break
-        print(data.decode("utf-8"))    
+        print(data.decode("utf-8"))
 
 def main():
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
     while True:
         command = input("Enter command: ")
 
@@ -21,6 +19,7 @@ def main():
             try:
                 _, host, port = command.split(" ")
                 port = int(port)
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 sock.connect((host, port))
                 break
             except Exception as e:
@@ -58,6 +57,8 @@ def main():
         elif command == "%leave":
             print("Leaving the public message board...")
             sock.sendall(b"%leave")
+            sock.close()
+            main()
 
         elif command == "%groups":
             sock.sendall(b"%groups")
@@ -84,8 +85,6 @@ def main():
 
         else:
             print("Invalid command.")
-
-    sock.close()
 
 if __name__ == "__main__":
     main()
