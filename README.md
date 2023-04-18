@@ -12,3 +12,6 @@ Instructions:
 2. *When using the commands, the % is necessary before every command*
 3. Enter "%connect 127.0.0.1 12340" (do not include quotation marks)
 4. Enter the name you want to use
+
+(KEY NOTES)
+Certain commands (i.e. %groupmessage, %leave, %exit) will mess up the entire program if formatted incorectly. The correct format is included in this project's description.
