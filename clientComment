@@ -1,0 +1,91 @@
+import socket
+import threading
+
+HOST = "127.0.0.1"
+PORT = 12340
+#receiving messages from socket
+def receive_messages(sock):
+    while True:
+        data = sock.recv(1024) 
+        if not data:
+            break #if not receiving from socket, stop
+        print(data.decode("utf-8"))    
+#connecting to server
+def main():
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    while True:
+        command = input("Enter command: ")
+
+        if command.startswith("%connect"): #keyword to begin
+            try:
+                _, host, port = command.split(" ")
+                port = int(port)
+                sock.connect((host, port))
+                break
+            except Exception as e:
+                print("Unable to connect. Please check the host and port and try again.")
+
+    name = input("Enter your name: ")#username
+    sock.sendall(name.encode("utf-8"))
+
+    threading.Thread(target=receive_messages, args=(sock,)).start()
+
+    while True:
+        command = input()
+
+        if command == "%join": #keyword to join
+            sock.sendall(b"%join")
+
+        elif command.startswith("%post"): #keyword to post
+            try:
+                _, subject, content = command.split(" ", 2)
+                sock.sendall((f"%post {subject} {content}").encode("utf-8"))
+            except ValueError:
+                print("Invalid post format.")
+                print("Usage: %post <subject> <content>")
+
+        elif command == "%users": #keyword to see users
+            sock.sendall(b"%users")
+
+        elif command.startswith("%message"): #keyword to see messages
+            try:
+                _, message_id = command.split(" ")
+                sock.sendall(("%message " + message_id).encode("utf-8"))
+            except ValueError:
+                print("Invalid message command format. Usage: %message <message_id>")
+
+        elif command == "%leave": #keyword to leave
+            print("Leaving the public message board...")
+            sock.sendall(b"%leave")
+
+        elif command == "%groups": #keyword to see groups
+            sock.sendall(b"%groups")
+
+        elif command.startswith("%groupjoin"): #keyword to join a group
+            sock.sendall(command.encode("utf-8"))
+
+        elif command.startswith("%grouppost"): #keyword to post to group
+            sock.sendall(command.encode("utf-8"))
+
+        elif command.startswith("%groupusers"): #keyword to see groupusers
+            sock.sendall(command.encode("utf-8"))
+
+        elif command.startswith("%groupleave"): #keyword to leave group
+            sock.sendall(command.encode("utf-8"))
+
+        elif command.startswith("%groupmessage"): #keyword to see group messages
+            sock.sendall(command.encode("utf-8"))
+
+        elif command == "%exit": #keyword to leave server
+            print("Disconnecting from the server and exiting...")
+            sock.close()
+            break
+
+        else:
+            print("Invalid command.")
+
+    sock.close()
+
+if __name__ == "__main__":
+    main()

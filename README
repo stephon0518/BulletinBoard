@@ -1,0 +1,5 @@
+(Assuming person is using Visual Studios(VS))
+1. run the server in the VS terminal then run the client in a new terminal
+2. enter "%connect 127.0.0.1 12340" (do not include quotation marks)
+3. enter the name you want to use
+4. enter "%join" to connect to public message board
