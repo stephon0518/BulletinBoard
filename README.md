@@ -8,10 +8,11 @@ Challenges faced:The main problem that we faced was getting part 1, which is the
 
 Instructions:
 (Assuming person is using Visual Studios(VS))
-1. run the server in the VS code terminal then run the client in one(or more depending on the # of users) new terminal
-2. *When using the commands, the % is necessary before every command*
-3. enter "%connect 127.0.0.1 12340" (do not include quotation marks)
-4. enter the name you want to use
-5. Enter whichever command you would like to use, key to start with either %join(public) and/or %groupjoin <Group#>(private)
-6. From here you can choose from a list of commands, including: %join, %post, %users, %leave, %message, %exit, %groups, %groupjoin, %grouppost, %groupusers, %groupleave, %groupmessage
-7. Every one of these commands has a unique formatting for them to work properly.
+I. run the server in the VS code terminal then run the client in one(or more depending on the # of users) new terminal
+II. *When using the commands, the % is necessary before every command*
+III. enter "%connect 127.0.0.1 12340" (do not include quotation marks)
+IV. enter the name you want to use
+V. Enter whichever command you would like to use, key to start with either %join(public) and/or %groupjoin <Group#>(private)
+VI. From here you can choose from a list of commands, including: %join, %post, %users, %leave, %message, %exit, %groups, %groupjoin, %grouppost, %groupusers, %groupleave, %groupmessage
+VII. Every one of these commands has a unique formatting for them to work properly.
+
