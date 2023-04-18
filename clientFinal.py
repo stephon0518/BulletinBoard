@@ -1,7 +1,7 @@
 import socket
 import threading
 
-#HOST AND PORT SPECIFICALLY FOR THIS IMPLEMENTATION
+#HOST AND PORT 
 HOST = "127.0.0.1"
 PORT = 12340
 
