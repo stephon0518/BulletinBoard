@@ -70,7 +70,7 @@ class ClientThread(threading.Thread):
                         continue
 
                     message_count += 1
-                    post_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    post_date = datetime.now().strftime("%m-%d-%Y %H:%M:%S")
                     formatted_message = f"\nMessage ID {message_count}, {name}, {post_date}, {subject}: {content}\n"
                     messages.append(formatted_message)
 
